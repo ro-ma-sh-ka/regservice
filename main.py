@@ -2,8 +2,7 @@ import os.path
 
 import tornado.web
 import tornado.ioloop
-from tornado.options import define, options
-from os import path
+from tornado.options import define
 
 
 define('port', default=8888, help='default port is 8888', type=int)
