@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Форма обращения</title>
+</head>
+<body>
+    <h4>Пожалуйста, заполните все поля формы обращения:</h4>
+    <form action="/send" method="get">
+        <!--
+- поле Фамилия (тип текст)
+- поле Имя (тип текст)
+- поле Отчество (тип текст)
+- поле Телефон (тип телефон, для упрощения цифры)
+- поле Обращение (тип большой текст)
+- кнопка "Отправить" (инициализируется отправку данных на бэкенд)
+        -->
+        <label for="name">Имя:</label><br>
+        <input type="text" id="name" name="name" maxlength="50" size="50"><br>
+
+        <label for="surname">Фамилия:</label><br>
+        <input type="text" id="surname" name="surname" maxlength="50" size="50"><br>
+
+        <label for="patronymic">Отчество:</label><br>
+        <input type="text" id="patronymic" name="patronymic" maxlength="50" size="50"><br>
+
+        <label for="phone">Номер телефона:</label><br>
+        <input type="tel" id="phone" name="phone" maxlength="50" pattern="[0-9]{1} [0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}" placeholder="7 123 456 78 90" size="50"><br>
+
+        <label for="appeal">Обращение:</label><br>
+        <textarea name="appeal" id="appeal" rows="10" cols="50" maxlength="3000"
+                  placeholder="Введите, пожалуйста, Ваше обращение (не более 3000 символов)."></textarea><br>
+
+        <input type="submit" name="send" value="Отправить">
+    </form>
+</body>
+</html>
