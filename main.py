@@ -1,5 +1,4 @@
 import os.path
-
 import tornado.web
 import tornado.ioloop
 from tornado.options import define
