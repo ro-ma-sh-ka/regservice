@@ -6,8 +6,9 @@ channel.queue_declare(queue='rpc_queue')
 
 
 def on_request(ch, method, props, body):
+    # здесь отправляем в фастапи (потребителю, консьюмеру
     n = body
-    print(" [.] %s" % n)
+    print(" [.] %s, ты молодец!?" % n)
     response = n
 
     ch.basic_publish(exchange='',

@@ -31,13 +31,13 @@ class GetRequestHandler(tornado.web.RequestHandler):
         name = self.get_argument("name")
         surname = self.get_argument("surname")
         phone = self.get_argument("phone")
+        appeal = self.get_argument("appeal")
+        rpc_message = rpc_client()
+        rpc_message.call(name)
+        self.render('message.html', name=name, surname=surname, phone=phone, appeal=appeal)
 
-        fibonacci_rpc = FibonacciRpcClient()
-        fibonacci_rpc.call(name)
-        self.render('message.html', name=name, surname=surname, phone=phone)
 
-
-class FibonacciRpcClient(object):
+class rpc_client(object):
 
     def __init__(self):
         self.connection = pika.BlockingConnection(
