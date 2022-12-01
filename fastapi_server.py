@@ -4,9 +4,9 @@ from fastapi import FastAPI
 app = FastAPI()
 
 
-@app.post("/send")
+@app.post("/")
 def test():
-    print('test')
+    return test
 
 
 if __name__ == '__main__':
