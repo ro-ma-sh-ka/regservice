@@ -3,7 +3,6 @@ import tornado.web
 import tornado.ioloop
 from tornado.options import define
 import pika
-import uuid
 
 
 define('port', default=8888, help='default port is 8888', type=int)
@@ -22,57 +21,29 @@ class Applications(tornado.web.Application):
 
 
 class AppealForm(tornado.web.RequestHandler):
-    async def get(self):
+    def get(self):
         self.render('base.html')
 
 
 class GetRequestHandler(tornado.web.RequestHandler):
-    async def get(self):
+    def get(self):
         name = self.get_argument("name")
         surname = self.get_argument("surname")
         phone = self.get_argument("phone")
         appeal = self.get_argument("appeal")
-        rpc_message = rpc_client()
-        rpc_message.call(name)
-        self.render('message.html', name=name, surname=surname, phone=phone, appeal=appeal)
 
-
-class rpc_client(object):
-
-    def __init__(self):
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='localhost'))
-
-        self.channel = self.connection.channel()
-
-        result = self.channel.queue_declare(queue='', exclusive=True)
-        self.callback_queue = result.method.queue
-
-        self.channel.basic_consume(
-            queue=self.callback_queue,
-            on_message_callback=self.on_response,
-            auto_ack=True)
-
-        self.response = None
-        self.corr_id = None
-
-    def on_response(self, ch, method, props, body):
-        if self.corr_id == props.correlation_id:
-            self.response = body
-
-    def call(self, n):
-        self.response = None
-        self.corr_id = str(uuid.uuid4())
-        self.channel.basic_publish(
+        # подклбчаемся к очереди и отправляем name
+        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+        channel = connection.channel()
+        channel.queue_declare(queue='rpc_queue')
+        channel.basic_publish(
             exchange='',
             routing_key='rpc_queue',
-            properties=pika.BasicProperties(
-                reply_to=self.callback_queue,
-                correlation_id=self.corr_id,
-            ),
-            body=str(n))
-        self.connection.process_data_events(time_limit=None)
-        return self.response
+            body=name
+        )
+        connection.close()
+
+        self.render('message.html', name=name, surname=surname, phone=phone, appeal=appeal)
 
 
 if __name__ == '__main__':
