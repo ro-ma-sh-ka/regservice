@@ -1,3 +1,4 @@
+import json
 import time
 import threading
 from fastapi import FastAPI
@@ -14,7 +15,8 @@ def hello():
 
 def pdf_process_function(msg):
     print(" PDF processing")
-    print(" [x] Received " + str(msg))
+    msg_dict = json.loads(msg)
+    print(" [x] Received ", msg_dict['name'])
     print(" PDF processing finished")
 
 
@@ -25,12 +27,12 @@ class BackgroundTasks(threading.Thread):
 
             connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel = connection.channel()  # start a channel
-            channel.queue_declare(queue='pdfprocess')
+            channel.queue_declare(queue='appeals')
 
             def callback(ch, method, properties, body):
                 pdf_process_function(body)
 
-            channel.basic_consume('pdfprocess', callback, auto_ack=True)
+            channel.basic_consume('appeals', callback, auto_ack=True)
             channel.start_consuming()
             connection.close()
 
@@ -40,4 +42,4 @@ class BackgroundTasks(threading.Thread):
 if __name__ == '__main__':
     t = BackgroundTasks()
     t.start()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app)
