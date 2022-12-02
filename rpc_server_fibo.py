@@ -11,14 +11,14 @@ def fib(n):
     elif n == 1:
         return 1
     else:
-        return fib(n - 1) + fib(n - 2)
+        return n # fib(n - 1) + fib(n - 2)
 
 
 def on_request(ch, method, props, body):
-    n = int(body)
-
+    # n = int(body)
+    n = body
     print(" [.] fib(%s)" % n)
-    response = fib(n)
+    response = n
 
     ch.basic_publish(exchange='',
                      routing_key=props.reply_to,

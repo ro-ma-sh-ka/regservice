@@ -3,6 +3,7 @@ import tornado.web
 import tornado.ioloop
 from tornado.options import define
 import pika
+import uuid
 
 
 define('port', default=8888, help='default port is 8888', type=int)
@@ -32,16 +33,30 @@ class GetRequestHandler(tornado.web.RequestHandler):
         phone = self.get_argument("phone")
         appeal = self.get_argument("appeal")
 
-        # подклбчаемся к очереди и отправляем name
-        connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
-        channel = connection.channel()
-        channel.queue_declare(queue='rpc_queue')
-        channel.basic_publish(
-            exchange='',
-            routing_key='rpc_queue',
-            body=name
-        )
+        # подключаемся к очереди и отправляем name
+        # connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        # channel = connection.channel()
+        # result = channel.queue_declare(queue='', exclusive=True)
+        # callback_queue = result.method.queue
+        #
+        # corr_id = str(uuid.uuid4())
+        # channel.basic_publish(
+        #     exchange='',
+        #     routing_key='rpc_queue',
+        #     properties=pika.BasicProperties(reply_to=callback_queue, correlation_id=corr_id,),
+        #     body=name)
+        # # connection.process_data_events(time_limit=None) # убрал, иначе не рендерилась страница
+        # connection.close()
+
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))  # Connect to CloudAMQP
+        channel = connection.channel()  # start a channel
+        channel.queue_declare(queue='pdfprocess')  # Declare a queue
+        # send a message
+
+        channel.basic_publish(exchange='', routing_key='pdfprocess', body='User information')
+        print("[x] Message sent to consumer")
         connection.close()
+
 
         self.render('message.html', name=name, surname=surname, phone=phone, appeal=appeal)
 
