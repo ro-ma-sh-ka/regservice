@@ -4,11 +4,12 @@ import threading
 from fastapi import FastAPI
 import uvicorn
 import pika
-import models.database_config
-import models.schemas
 from sqlalchemy.orm import Session
-from models.database_config import engine
+from service_db.database_config import Base, engine
+import service_db.models
+import service_db.schemas
 
+Base.metadata.create_all(engine)
 app = FastAPI()
 
 
@@ -17,13 +18,13 @@ def hello():
     return {"message": "hello", "x": 'response'}
 
 
-def write_appeal(appeal: models.schemas.Appeal):
+def write_appeal(appeal: service_db.schemas.Appeal):
 
     # create a new database session
     session = Session(bind=engine, expire_on_commit=False)
 
     # create an instance of the
-    appeal_to_write = models.database_config.Appeal(appeal_message=appeal)
+    appeal_to_write = service_db.models.Appeal(appeal_message=appeal)
 
     # add it to the session and commit it
     session.add(appeal_to_write)
@@ -33,12 +34,12 @@ def write_appeal(appeal: models.schemas.Appeal):
     session.close()
 
 
-def write_user(user: models.schemas.User):
+def write_user(user: service_db.schemas.User):
     # create a new database session
     session = Session(bind=engine, expire_on_commit=False)
 
     # create an instance of the
-    user_to_write = models.database_config.User(name=user.name)
+    user_to_write = service_db.models.User(name=user.name)
 
     # add it to the session and commit it
     session.add(user_to_write)
@@ -51,7 +52,7 @@ def write_user(user: models.schemas.User):
 def pdf_process_function(msg):
     print(" PDF processing")
     msg_dict = json.loads(msg)
-    print(" [x] Received ", msg_dict['name'])
+    print(" [x] Received ", msg_dict['appeal'])
     # write_user()
     write_appeal(msg_dict['appeal'])
 
@@ -61,8 +62,6 @@ def pdf_process_function(msg):
 class BackgroundTasks(threading.Thread):
     def run(self, *args, **kwargs):
         while True:
-            print(" [x] Requesting fib(30)")
-
             connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
             channel = connection.channel()  # start a channel
             channel.queue_declare(queue='appeals')
