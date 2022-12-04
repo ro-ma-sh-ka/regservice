@@ -18,13 +18,13 @@ def hello():
     return {"message": "hello", "x": 'response'}
 
 
-def write_appeal(appeal: service_db.schemas.Appeal):
+def write_appeal(appeal: service_db.schemas.Appeal, user_id):
 
     # create a new database session
     session = Session(bind=engine, expire_on_commit=False)
 
     # create an instance of the
-    appeal_to_write = service_db.models.Appeal(appeal_message=appeal)
+    appeal_to_write = service_db.models.Appeal(appeal_message=appeal, user=user_id)
 
     # add it to the session and commit it
     session.add(appeal_to_write)
@@ -34,17 +34,22 @@ def write_appeal(appeal: service_db.schemas.Appeal):
     session.close()
 
 
-def write_user(user: service_db.schemas.User):
+def write_user(name: service_db.schemas.User,
+               surname: service_db.schemas.User,
+               patronymic: service_db.schemas.User,
+               phone: service_db.schemas.User,
+               appeal: service_db.schemas.Appeal):
     # create a new database session
     session = Session(bind=engine, expire_on_commit=False)
 
     # create an instance of the
-    user_to_write = service_db.models.User(name=user.name)
+    user_to_write = service_db.models.User(name=name, surname=surname, patronymic=patronymic, phone=phone)
 
     # add it to the session and commit it
     session.add(user_to_write)
     session.commit()
-
+    user_id = user_to_write.id
+    write_appeal(appeal, user_id)
     # close the session
     session.close()
 
@@ -53,8 +58,7 @@ def pdf_process_function(msg):
     print(" PDF processing")
     msg_dict = json.loads(msg)
     print(" [x] Received ", msg_dict['appeal'])
-    # write_user()
-    write_appeal(msg_dict['appeal'])
+    write_user(msg_dict['name'], msg_dict['surname'], msg_dict['patronymic'], msg_dict['phone'], msg_dict['appeal'])
 
     print(" PDF processing finished")
 
