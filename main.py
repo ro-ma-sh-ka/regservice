@@ -1,12 +1,12 @@
 import os.path
 import tornado.web
 import tornado.ioloop
-from tornado.options import define
+import tornado.options
 import pika
 import json
 
 
-define('port', default=8888, help='default port is 8888', type=int)
+#define('port', default=80, help='default port is 8888', type=int)
 
 
 class Applications(tornado.web.Application):
@@ -43,12 +43,17 @@ class GetRequestHandler(tornado.web.RequestHandler):
         print("[x] Message sent to consumer")
         connection.close()
 
-        self.render('message.html', name=appeal['name'], surname=appeal['surname'], \
-                    patronymic=appeal['patronymic'], phone=appeal['phone'], appeal=appeal['appeal'])
+        self.render('message.html',
+                    name=appeal['name'],
+                    surname=appeal['surname'],
+                    patronymic=appeal['patronymic'],
+                    phone=appeal['phone'],
+                    appeal=appeal['appeal'])
 
 
 if __name__ == '__main__':
     app = Applications()
-    app.listen(8888)
-    print('im listening port 8888')
+    port = 8888
+    app.listen(port)
+    print(f'im listening port {port}')
     tornado.ioloop.IOLoop.current().start()
